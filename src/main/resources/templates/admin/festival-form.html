@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Admin • Festival formulier')}"></head>
+<body class="bg-gray-50">
+  <div th:replace="~{fragments :: navbar}"></div>
+  <div th:replace="~{fragments :: flash}"></div>
+
+  <main class="container mx-auto px-4 py-8">
+    <h1 class="text-xl font-semibold mb-4" th:text="${festival.festivalId} != null ? 'Festival bewerken' : 'Nieuw festival'">Form</h1>
+
+    <form th:object="${festival}"
+          th:action="${festival.festivalId} != null ? @{'/admin/festivals/' + ${festival.festivalId}} : @{/admin/festivals}"
+          method="post"
+          class="bg-white rounded-xl shadow p-6 grid md:grid-cols-2 gap-5">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Naam</label>
+        <input th:field="*{name}" class="border rounded p-2 w-full" required>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Startdatum & tijd</label>
+        <input th:field="*{startDateTime}" type="datetime-local" class="border rounded p-2 w-full" required>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Beschikbare tickets</label>
+        <input th:field="*{availableTickets}" type="number" min="1" class="border rounded p-2 w-full" required>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Ticketprijs (€)</label>
+        <input th:field="*{ticketPrice}" type="number" step="0.01" min="0" class="border rounded p-2 w-full" required>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Categorie</label>
+        <select th:field="*{category}" class="border rounded p-2 w-full" required>
+          <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.name}">Cat</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Streek</label>
+        <select id="regionSelect" class="border rounded p-2 w-full">
+          <option th:each="r : ${regions}" th:value="${r.regionId}" th:text="${r.name}">Reg</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm text-gray-600 mb-1">Locatie</label>
+        <select th:field="*{location}" class="border rounded p-2 w-full" required>
+          <option th:each="l : ${locations}" th:value="${l.locationId}"
+                  th:text="${l.name + ' (' + l.region.name + ')'}">Loc</option>
+        </select>
+        <p class="text-xs text-gray-500 mt-1">Tip: filter locaties client-side door eerst een streek te kiezen (optioneel script).</p>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-sm text-gray-600 mb-1">Standhouders (max 4)</label>
+        <select th:field="*{standhouders}" multiple size="6" class="border rounded p-2 w-full">
+          <option th:each="s : ${standhouders}" th:value="${s.standhouderId}" th:text="${s.name}">S</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2 flex items-center gap-3">
+        <button class="px-4 py-2 rounded bg-black text-white">Opslaan</button>
+        <a href="/admin/festivals" class="px-4 py-2 rounded border">Annuleren</a>
+      </div>
+    </form>
+  </main>
+
+  <div th:replace="~{fragments :: footer}"></div>
+
+  <!-- Optioneel: klein scriptje om locaties te filteren op regio client-side (kan later) -->
+</body>
+</html>

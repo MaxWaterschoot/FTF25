@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title}">Foodtruckfestivals</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { theme: { extend: { container: { center: true }}}}
+  </script>
+</head>
+
+<body th:fragment="navbar">
+  <header class="border-b bg-white">
+    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="/" class="text-xl font-bold">Foodtruckfestivals</a>
+      <nav class="flex items-center gap-4">
+        <a href="/festivals" class="text-gray-700 hover:text-black">Festivals</a>
+
+        <a href="/admin/festivals"
+           class="text-gray-700 hover:text-black"
+           sec:authorize="hasRole('ADMIN')">Admin</a>
+
+        <div sec:authorize="isAuthenticated()">
+          <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button class="px-3 py-1 rounded border">Logout</button>
+          </form>
+        </div>
+
+        <a sec:authorize="isAnonymous()" href="/login" class="px-3 py-1 rounded border">
+          Login
+        </a>
+      </nav>
+    </div>
+  </header>
+</body>
+
+<body th:fragment="flash">
+  <div class="container mx-auto px-4 mt-4">
+    <div th:if="${param.success}" class="p-3 rounded bg-green-50 border border-green-200 text-green-800">
+      <span th:text="${param.success}">Succes</span>
+    </div>
+    <div th:if="${param.error}" class="p-3 rounded bg-red-50 border border-red-200 text-red-800">
+      <span th:text="${param.error}">Fout</span>
+    </div>
+  </div>
+</body>
+
+<body th:fragment="footer">
+  <footer class="border-t mt-12">
+    <div class="container mx-auto px-4 py-6 text-sm text-gray-600">
+      © <span th:text="${#dates.year(#dates.createNow())}">2025</span> Foodtruckfestivals
+    </div>
+  </footer>
+</body>
+</html>
