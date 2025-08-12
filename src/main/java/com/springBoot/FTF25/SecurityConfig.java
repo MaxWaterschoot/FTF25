@@ -23,31 +23,33 @@ public class SecurityConfig {
     }
 
 	
-	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	  http
-	    .authorizeHttpRequests(auth -> auth
-	      .requestMatchers("/", "/festivals/**", "/css/**", "/js/**", "/images/**", "/login", "/error").permitAll()
-	      .requestMatchers("/admin/**").hasRole("ADMIN")
-	      // User-only functionaliteit
-	      .requestMatchers("/tickets/**", "/reviews/**").hasRole("USER")
-	      .anyRequest().authenticated()
-	    )
-	    .formLogin(form -> form
-	      .loginPage("/login").permitAll()
-	      .defaultSuccessUrl("/", true)
-	      .failureUrl("/login?error")
-	    )
-	    .logout(logout -> logout
-	      .logoutUrl("/logout")
-	      .logoutSuccessUrl("/?logout")
-	      .invalidateHttpSession(true)
-	      .deleteCookies("JSESSIONID")
-	    )
-	    .exceptionHandling(e -> e.accessDeniedPage("/access-denied"))
-	    .csrf(Customizer.withDefaults());
-	  return http.build();
-	}
+	 @Bean
+	    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	        http
+	            .csrf(csrf -> csrf.ignoringRequestMatchers(
+	                // REST endpoints die forms aanroepen mogen CSRF negeren als je pure fetch gebruikt;
+	                // gebruik je normale <form>, laat CSRF dan AAN en stuur de token mee in het formulier.
+	                "/api/**"
+	            ))
+	            .authorizeHttpRequests(auth -> auth
+	                .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/webjars/**", "/login", "/logout", "/festivals", "/api/festivals/**", "/api/reviews/**").permitAll()
+	                .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
+	                .anyRequest().authenticated()
+	            )
+	            .formLogin(form -> form
+	                .loginPage("/login").permitAll()
+	                .defaultSuccessUrl("/", true)
+	                .failureUrl("/login?error")
+	            )
+	            .logout(l -> l
+	                .logoutUrl("/logout")
+	                .logoutSuccessUrl("/?logout")
+	                .invalidateHttpSession(true)
+	                .deleteCookies("JSESSIONID")
+	                .permitAll()
+	            );
+	        return http.build();
+	    }
 
     @Bean
     PasswordEncoder passwordEncoder() {

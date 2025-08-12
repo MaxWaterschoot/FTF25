@@ -18,43 +18,31 @@
       <a href="/" class="text-xl font-bold">Foodtruckfestivals</a>
 
       <nav class="flex items-center gap-4">
+        <!-- Publieke links -->
         <a href="/festivals" class="text-gray-700 hover:text-black">Festivals</a>
 
-        <!-- Alleen USERS -->
-        <span sec:authorize="hasRole('USER')" class="flex items-center gap-4">
-          <a href="/tickets/mine" class="text-gray-700 hover:text-black">Mijn tickets</a>
-          <a href="/reviews/mine" class="text-gray-700 hover:text-black">Mijn reviews</a>
-        </span>
-
-        <!-- Alleen ADMINS -->
+        <!-- ADMIN ONLY -->
         <div sec:authorize="hasRole('ADMIN')" class="relative group">
-          <button class="text-gray-700 hover:text-black">Admin</button>
-          <div class="absolute hidden group-hover:block bg-white border rounded shadow p-2 right-0 min-w-48">
-            <a href="/admin/festivals" class="block px-3 py-1 hover:bg-gray-50">Beheer festivals</a>
-            <a href="/admin/standhouders" class="block px-3 py-1 hover:bg-gray-50">Beheer standhouders</a>
-            <a href="/admin/locaties" class="block px-3 py-1 hover:bg-gray-50">Beheer locaties</a>
+          <button class="text-gray-700 hover:text-black">Admin ▾</button>
+          <div class="absolute hidden group-hover:block bg-white border rounded shadow p-2 right-0 w-56">
+            <a href="/admin/festivals" class="block px-3 py-2 hover:bg-gray-50">Beheer festivals</a>
+            <a href="/admin/festivals/new" class="block px-3 py-2 hover:bg-gray-50">Nieuw festival</a>
+            <a href="/admin/overzicht" class="block px-3 py-2 hover:bg-gray-50">Inschrijvingen & reviews</a>
           </div>
         </div>
 
-        <!-- Auth info rechts -->
-        <div class="flex items-center gap-3">
-          <span sec:authorize="isAuthenticated()" class="text-sm text-gray-600">
-            <span sec:authentication="name"></span>
-            <span class="text-xs text-gray-500"
-                  th:text="${#lists.join(#authentication.authorities.?[true].![authority], ', ')}">ROLE_USER</span>
-          </span>
+        <!-- Auth -->
+        <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+          <button class="px-3 py-1 rounded border">Logout</button>
+        </form>
 
-          <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button class="px-3 py-1 rounded border">Logout</button>
-          </form>
-
-          <a sec:authorize="isAnonymous()" href="/login" class="px-3 py-1 rounded border">Login</a>
-        </div>
+        <a sec:authorize="isAnonymous()" href="/login" class="px-3 py-1 rounded border">Login</a>
       </nav>
     </div>
   </header>
 </body>
+
 
 
 <body th:fragment="flash">
