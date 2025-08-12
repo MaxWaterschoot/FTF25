@@ -62,9 +62,12 @@
 
       <div class="md:col-span-2">
         <label class="block text-sm text-gray-600 mb-1">Standhouders (max 4)</label>
-        <select th:field="*{standhouders}" multiple size="6" class="border rounded p-2 w-full">
-          <option th:each="s : ${standhouders}" th:value="${s.standhouderId}" th:text="${s.name}">S</option>
-        </select>
+  <select th:field="*{standhouderIds}" multiple size="6" class="border rounded p-2 w-full">
+    <option th:each="s : ${standhouders}"
+            th:value="${s.standhouderId}"
+            th:text="${s.name}">
+    </option>
+  </select>
       </div>
 
       <div class="md:col-span-2 flex items-center gap-3">

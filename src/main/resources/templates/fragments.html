@@ -34,7 +34,7 @@
     </li>
 
     <!-- Voor ingelogde gebruikers -->
-    <li sec:authorize="hasAnyRole('USER','ADMIN')">
+    <li sec:authorize="hasRole('USER')">
       <a th:href="@{/my/tickets}">Mijn tickets</a>
     </li>
 
