@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface TicketPurchaseRepository extends JpaRepository<TicketPurchase, Long> {
 
@@ -35,4 +36,6 @@ public interface TicketPurchaseRepository extends JpaRepository<TicketPurchase, 
 
     /** Nodig om te checken of de user ingeschreven was (voor review-rechten). */
     boolean existsByUserAndFestival(AppUser user, Festival festival);
+    List<TicketPurchase> findByUser_Username(String username);
+
 }

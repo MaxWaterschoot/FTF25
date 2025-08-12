@@ -80,4 +80,9 @@ public class TicketPurchaseServiceImpl implements TicketPurchaseService {
 
         ticketPurchaseRepository.save(tp);
     }
+    
+    @Override
+    public java.util.List<domain.TicketPurchase> findByUsername(String username) {
+        return ticketPurchaseRepository.findByUser_Username(username);
+    }
 }

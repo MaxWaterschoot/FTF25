@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="nl" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: head('MyTickets')}"></head>
+
+<body class="bg-gray-50">
+<div th:replace="~{fragments :: navbar}"></div>
+	<div th:replace="~{fragments :: flash}"></div>
+
+<main class="max-w-4xl mx-auto p-6">
+  <h1 class="text-2xl font-semibold mb-4">Mijn tickets</h1>
+
+  <div th:if="${#lists.isEmpty(purchases)}" class="text-gray-600">
+    Je hebt nog geen tickets.
+  </div>
+
+  <ul th:if="${!#lists.isEmpty(purchases)}" class="space-y-3">
+    <li th:each="p : ${purchases}" class="p-4 bg-white rounded-xl shadow">
+      <div class="font-medium" th:text="${p.festival.name}">Festivalnaam</div>
+      <div class="text-sm text-gray-600">
+        Aantal: <span th:text="${p.quantity}">0</span>
+        • Datum: <span th:text="${#temporals.format(p.festival.startDateTime, 'dd/MM/yyyy HH:mm')}">datum</span>
+        • Locatie: <span th:text="${p.festival.location}">locatie</span>
+        • Gekocht op: <span th:text="${#temporals.format(p.purchasedAt, 'dd/MM/yyyy HH:mm')}">gekocht</span>
+      </div>
+    </li>
+  </ul>
+</main>
+</body>
+</html>

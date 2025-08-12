@@ -18,6 +18,7 @@ import repository.AppUserRepository;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,12 @@ public class AppUserServiceImpl implements UserDetailsService {
 	    }
 
 	    private Collection<? extends GrantedAuthority> convertAuthorities(Set<Role> set) {
-	        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + set.toString()));
+	        return set.stream()
+	                // Als Role een ENUM is: r.name()
+	                // Als Role een entity met veld 'name' is: r.getName()
+	                .map(r -> new SimpleGrantedAuthority("ROLE_" + (
+	                        r instanceof Enum<?> ? ((Enum<?>) r).name() : r.name()
+	                )))
+	                .collect(Collectors.toSet());
 	    }
 }
