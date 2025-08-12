@@ -23,32 +23,31 @@ public class SecurityConfig {
     }
 
 	
-	 @Bean
-	  SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-	    http
-	      .csrf(csrf -> csrf.disable()) // of laten aan + CSRF hidden inputs in formulieren
-	      .authorizeHttpRequests(auth -> auth
-	        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-	        .requestMatchers("/admin/**").hasRole("ADMIN")
-	        // Tickets alleen voor USER en expliciet NIET voor ADMIN
-	        .requestMatchers("/tickets/**").hasRole("USER")
-	        .anyRequest().authenticated()
-	      )
-	      .formLogin(login -> login
-	        .loginPage("/login")
-	        .defaultSuccessUrl("/", true)
-	        .failureUrl("/login?error=Ongeldige+inloggegevens")
-	        .permitAll()
-	      )
-	      .logout(logout -> logout
-	        .logoutUrl("/logout")
-	        .logoutSuccessUrl("/?success=Je+bent+afgemeld")
-	        .invalidateHttpSession(true)
-	        .deleteCookies("JSESSIONID")
-	      );
-
-	    return http.build();
-	  }
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	  http
+	    .authorizeHttpRequests(auth -> auth
+	      .requestMatchers("/", "/festivals/**", "/css/**", "/js/**", "/images/**", "/login", "/error").permitAll()
+	      .requestMatchers("/admin/**").hasRole("ADMIN")
+	      // User-only functionaliteit
+	      .requestMatchers("/tickets/**", "/reviews/**").hasRole("USER")
+	      .anyRequest().authenticated()
+	    )
+	    .formLogin(form -> form
+	      .loginPage("/login").permitAll()
+	      .defaultSuccessUrl("/", true)
+	      .failureUrl("/login?error")
+	    )
+	    .logout(logout -> logout
+	      .logoutUrl("/logout")
+	      .logoutSuccessUrl("/?logout")
+	      .invalidateHttpSession(true)
+	      .deleteCookies("JSESSIONID")
+	    )
+	    .exceptionHandling(e -> e.accessDeniedPage("/access-denied"))
+	    .csrf(Customizer.withDefaults());
+	  return http.build();
+	}
 
     @Bean
     PasswordEncoder passwordEncoder() {
