@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
 <head th:replace="~{fragments :: head('Festival detail')}"></head>
 <body class="bg-gray-50">
   <div th:replace="~{fragments :: navbar}"></div>
@@ -26,7 +27,7 @@
             </span>
           </p>
         </div>
-        <div class="text-right" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+        <div class="text-right" sec:authorize="hasRole('ADMIN')">
           <a th:href="@{|/admin/festivals/${festival.festivalId}/edit|}" class="px-3 py-1 rounded border">Bewerken</a>
         </div>
       </div>

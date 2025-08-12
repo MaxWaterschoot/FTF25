@@ -23,39 +23,32 @@ public class SecurityConfig {
     }
 
 	
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            // REST-API kan CSRF negeren
-            .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/api/**")))
-            .authorizeHttpRequests(auth -> auth
-                // Publieke pagina's & statics
-                .requestMatchers(
-                        "/", "/home", "/login",
-                        "/festivals", "/festivals/**",
-                        "/css/**", "/js/**", "/images/**", "/webjars/**", "/i18n/**"
-                ).permitAll()
-                // Admin-only
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                // REST publiek (indien je endpoints hebt die geen auth vereisen)
-                .requestMatchers("/api/public/**").permitAll()
-                // De rest: ingelogd
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .permitAll()
-                .defaultSuccessUrl("/", true)
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-            )
-            // Handige basic auth voor snelle REST-tests
-            .httpBasic(Customizer.withDefaults());
+	 @Bean
+	  SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	    http
+	      .csrf(csrf -> csrf.disable()) // of laten aan + CSRF hidden inputs in formulieren
+	      .authorizeHttpRequests(auth -> auth
+	        .requestMatchers("/", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+	        .requestMatchers("/admin/**").hasRole("ADMIN")
+	        // Tickets alleen voor USER en expliciet NIET voor ADMIN
+	        .requestMatchers("/tickets/**").hasRole("USER")
+	        .anyRequest().authenticated()
+	      )
+	      .formLogin(login -> login
+	        .loginPage("/login")
+	        .defaultSuccessUrl("/", true)
+	        .failureUrl("/login?error=Ongeldige+inloggegevens")
+	        .permitAll()
+	      )
+	      .logout(logout -> logout
+	        .logoutUrl("/logout")
+	        .logoutSuccessUrl("/?success=Je+bent+afgemeld")
+	        .invalidateHttpSession(true)
+	        .deleteCookies("JSESSIONID")
+	      );
 
-        return http.build();
-    }
+	    return http.build();
+	  }
 
     @Bean
     PasswordEncoder passwordEncoder() {

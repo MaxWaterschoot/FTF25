@@ -65,7 +65,7 @@ public class InitDataConfig {
                     .username("admin")
                     .password(encoder.encode("admin"))
                     .enabled(true)
-                    .roles(Set.of(Role.ADMIN, Role.USER))
+                    .roles(Set.of(Role.ADMIN))
                     .build();
             AppUser user = AppUser.builder()
                     .username("user")

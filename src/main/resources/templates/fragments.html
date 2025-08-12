@@ -13,29 +13,38 @@
 </head>
 
 <body th:fragment="navbar">
-  <header class="border-b bg-white">
-    <div class="container mx-auto px-4 py-4 flex items-center justify-between">
-      <a href="/" class="text-xl font-bold">Foodtruckfestivals</a>
-      <nav class="flex items-center gap-4">
-        <a href="/festivals" class="text-gray-700 hover:text-black">Festivals</a>
+  <header class="border-b bg-white" th:fragment="navbar">
+  <div class="container mx-auto px-4 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold">Foodtruckfestivals</a>
 
-        <a href="/admin/festivals"
-           class="text-gray-700 hover:text-black"
-           sec:authorize="hasRole('ADMIN')">Admin</a>
+    <nav class="flex items-center gap-4">
+      <a href="/festivals" class="text-gray-700 hover:text-black">Festivals</a>
 
-        <div sec:authorize="isAuthenticated()">
-          <form th:action="@{/logout}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <button class="px-3 py-1 rounded border">Logout</button>
-          </form>
-        </div>
+      <!-- Admin menu -->
+      <div sec:authorize="hasRole('ADMIN')" class="flex items-center gap-3">
+        <a href="/admin/festivals"   class="text-gray-700 hover:text-black">Beheer festivals</a>
+        <a href="/admin/categories"  class="text-gray-700 hover:text-black">Categorieën</a>
+        <a href="/admin/regions"     class="text-gray-700 hover:text-black">Regio's</a>
+        <a href="/admin/locations"   class="text-gray-700 hover:text-black">Locaties</a>
+        <a href="/admin/standhouders" class="text-gray-700 hover:text-black">Standhouders</a>
+        <a href="/admin/tickets"     class="text-gray-700 hover:text-black">Ticket aankopen</a>
+        <a href="/admin/users"       class="text-gray-700 hover:text-black">Gebruikers</a>
+      </div>
 
-        <a sec:authorize="isAnonymous()" href="/login" class="px-3 py-1 rounded border">
-          Login
-        </a>
-      </nav>
-    </div>
-  </header>
+      <!-- User menu -->
+      <a sec:authorize="hasRole('USER')" href="/tickets" class="text-gray-700 hover:text-black">Koop tickets</a>
+      <a sec:authorize="hasRole('USER')" href="/account" class="text-gray-700 hover:text-black">Mijn tickets</a>
+
+      <!-- Auth knoppen -->
+      <form sec:authorize="isAuthenticated()" th:action="@{/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <button class="px-3 py-1 rounded border">Logout</button>
+      </form>
+
+      <a sec:authorize="isAnonymous()" href="/login" class="px-3 py-1 rounded border">Login</a>
+    </nav>
+  </div>
+</header>
 </body>
 
 <body th:fragment="flash">

@@ -3,6 +3,8 @@ package com.springBoot.FTF25;
 import domain.AppUser;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -20,6 +22,7 @@ public class TicketController {
     private final AppUserRepository appUserRepository;
 
     @PostMapping("/buy/{festivalId}")
+    @PreAuthorize("hasRole('USER')")
     public String buy(@PathVariable Long festivalId,
                       @RequestParam("quantity") int quantity,
                       Principal principal,
