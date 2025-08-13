@@ -53,7 +53,7 @@ public class InitDataConfig {
             Location antwerpen = locationRepository.save(Location.builder().name("Antwerpen Groenplaats").region(ant).build());
             Location hasselt = locationRepository.save(Location.builder().name("Hasselt Kolonel Dusart").region(lim).build());
 
-            // Standhouders (max 4 per festival → enforced in service/validator; hier ≤4)
+            // Standhouders
             Standhouder s1 = standhouderRepository.save(Standhouder.builder().name("La Pasta Nostra").build());
             Standhouder s2 = standhouderRepository.save(Standhouder.builder().name("Vegan Vibes").build());
             Standhouder s3 = standhouderRepository.save(Standhouder.builder().name("BBQ Brothers").build());
@@ -75,15 +75,17 @@ public class InitDataConfig {
                     .build();
             appUserRepository.saveAll(List.of(admin, user));
 
-            // Helper voor datum/tijd
+            // Helper voor datum/tijd (binnen 2025-periode)
             LocalDateTime now = timeProvider.now().withSecond(0).withNano(0);
 
-            // Festivals (zorg dat “zelfde categorie niet op dezelfde dag” gerespecteerd blijft)
+            // Festivals (codes + geldige prijzen)
             Festival f1 = Festival.builder()
                     .name("Gentse Foodtruck Fiesta")
                     .startDateTime(now.plusDays(10).withHour(17).withMinute(0))
-                    .availableTickets(250)
-                    .ticketPrice(new BigDecimal("12.50"))
+                    .availableTickets(250)                          // 50..300
+                    .ticketPrice(new BigDecimal("12.50"))           // >=10.50, <40
+                    .festivalCode1(100)                             // even, >0
+                    .festivalCode2(102)                             // %3==0, |diff|<300
                     .location(gent)
                     .category(italian)
                     .standhouders(List.of(s1, s5))
@@ -93,7 +95,9 @@ public class InitDataConfig {
                     .name("Brugge Vegan Street")
                     .startDateTime(now.plusDays(12).withHour(16).withMinute(0))
                     .availableTickets(200)
-                    .ticketPrice(new BigDecimal("10.00"))
+                    .ticketPrice(new BigDecimal("10.50"))           // was 10.00 -> 10.50
+                    .festivalCode1(200)
+                    .festivalCode2(198)
                     .location(brugge)
                     .category(vegan)
                     .standhouders(List.of(s2, s4))
@@ -104,6 +108,8 @@ public class InitDataConfig {
                     .startDateTime(now.plusDays(15).withHour(18).withMinute(30))
                     .availableTickets(300)
                     .ticketPrice(new BigDecimal("14.00"))
+                    .festivalCode1(300)
+                    .festivalCode2(294)
                     .location(antwerpen)
                     .category(bbq)
                     .standhouders(List.of(s3, s4))
@@ -113,7 +119,9 @@ public class InitDataConfig {
                     .name("Hasselt Street Bites")
                     .startDateTime(now.plusDays(20).withHour(15).withMinute(0))
                     .availableTickets(180)
-                    .ticketPrice(new BigDecimal("9.50"))
+                    .ticketPrice(new BigDecimal("11.00"))           // was 9.50 -> 11.00
+                    .festivalCode1(120)
+                    .festivalCode2(117)
                     .location(hasselt)
                     .category(street)
                     .standhouders(List.of(s4, s2))

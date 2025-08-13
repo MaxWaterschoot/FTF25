@@ -25,7 +25,8 @@
 						/ 5
 					</p>
 					<p class="mt-1">
-						Prijs: € <span th:text="${festival.ticketPrice}">0.00</span>
+						Prijs: € <span th:text="|€ ${#numbers.formatDecimal(festival.ticketPrice, 1, 2)}|">0,00</span>
+
 					</p>
 					<p class="mt-1">
 						Tickets: <span class="font-medium" th:text="${remainingTickets}">0</span>

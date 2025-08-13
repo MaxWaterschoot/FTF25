@@ -52,6 +52,9 @@ public class AdminFestivalController {
                 .map(Standhouder::getStandhouderId)
                 .collect(Collectors.toList())
         );
+        form.setFestivalCode1(f.getFestivalCode1());
+        form.setFestivalCode2(f.getFestivalCode2());
+
 
         model.addAttribute("festival", form); // zelfde attribuutnaam als in je form
         model.addAttribute("categories", categoryRepo.findAll());
@@ -71,7 +74,9 @@ public class AdminFestivalController {
         f.setTicketPrice(form.getTicketPrice());
         f.setCategory(categoryRepo.findById(form.getCategory()).orElseThrow());
         f.setLocation(locationRepo.findById(form.getLocation()).orElseThrow());
-
+        f.setFestivalCode1(form.getFestivalCode1());
+        f.setFestivalCode2(form.getFestivalCode2());
+        
         List<Standhouder> selected = new ArrayList<>(standhouderRepo.findAllById(form.getStandhouderIds()));
         f.setStandhouders(selected);
 
@@ -99,6 +104,8 @@ public class AdminFestivalController {
         f.setCategory(categoryRepo.findById(form.getCategory()).orElseThrow());
         f.setLocation(locationRepo.findById(form.getLocation()).orElseThrow());
         f.setStandhouders(new ArrayList<>(standhouderRepo.findAllById(form.getStandhouderIds())));
+        f.setFestivalCode1(form.getFestivalCode1());
+        f.setFestivalCode2(form.getFestivalCode2());
         festivalRepo.save(f);
         return "redirect:/admin/festivals";
     }

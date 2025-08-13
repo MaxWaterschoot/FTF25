@@ -7,8 +7,13 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
 
@@ -37,24 +42,32 @@ public class Festival {
     private Long festivalId;
 
     @NotBlank
+    @Pattern(regexp = "^[A-Za-z]{3}.*", message = "{festival.name.prefix}")
     private String name;
 
     @JsonSerialize(using = utils.LocalDateTimeSerializer.class)
     @JsonDeserialize(using = utils.LocalDateTimeDeserializer.class)
+    // @WithinFestivalPeriod(start = "2025-01-01T00:00", end = "2025-12-31T23:59",
+    //message = "{festival.period}")
     private LocalDateTime startDateTime;
 
     @JsonSerialize(using = utils.TicketPriceSerializer.class)
     @JsonDeserialize(using = utils.TicketPriceDeserializer.class)
+    @DecimalMin(value = "10.50", inclusive = true, message = "{festival.price.range}")
+    @DecimalMax(value = "40.00", inclusive = false, message = "{festival.price.range}")
     private BigDecimal ticketPrice;
 
-    /** Capaciteit voor dit festival (basis: “Aantal beschikbare tickets”) */
     @Positive
+    @Min(value = 50, message = "{festival.tickets.range}")
+    @Max(value = 300, message = "{festival.tickets.range}")
     private int availableTickets;
 
-    /** Extra validatie in validator: strikt even/door 3/verschil < 300. */
+    @NotNull(message = "{festival.codes.required}")
     private Integer festivalCode1;
-    private Integer festivalCode2;
 
+    @NotNull(message = "{festival.codes.required}")
+    private Integer festivalCode2;
+    
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id")
     @JsonIgnore
@@ -65,7 +78,6 @@ public class Festival {
     @JsonIgnore
     private Category category;
 
-    /** Max 4 standhouders -> enforced via validator. */
     @ManyToMany
     @JoinTable(
             name = "festival_standhouder",
@@ -75,17 +87,14 @@ public class Festival {
     @JsonIgnore
     private List<Standhouder> standhouders = new ArrayList<>();
 
-    /** Inschrijvingen/aankopen (met aantallen) */
     @OneToMany(mappedBy = "festival", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<TicketPurchase> purchases = new ArrayList<>();
 
-    /** Reviews door users (1 per user per festival) */
     @OneToMany(mappedBy = "festival", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
-    /** Niet persistent: nog resterende tickets = capaciteit - som van aangekochte aantallen */
     @Transient
     public int getRemainingTickets() {
         return availableTickets - purchases.stream().mapToInt(TicketPurchase::getQuantity).sum();

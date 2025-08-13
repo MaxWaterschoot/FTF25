@@ -6,70 +6,113 @@
   <div th:replace="~{fragments :: flash}"></div>
 
   <main class="container mx-auto px-4 py-8">
-    <h1 class="text-xl font-semibold mb-4" th:text="${festival.festivalId} != null ? 'Festival bewerken' : 'Nieuw festival'">Form</h1>
+    <h1 class="text-xl font-semibold mb-4"
+        th:text="${festival.festivalId} != null ? 'Festival bewerken' : 'Nieuw festival'">
+      Form
+    </h1>
 
     <form th:object="${festival}"
           th:action="${festival.festivalId} != null ? @{'/admin/festivals/' + ${festival.festivalId}} : @{/admin/festivals}"
           method="post"
           class="bg-white rounded-xl shadow p-6 grid md:grid-cols-2 gap-5">
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-      <div>
-        <label class="block text-sm text-gray-600 mb-1">Naam</label>
-        <input th:field="*{name}" class="border rounded p-2 w-full" required>
+      <!-- Globale fouten (class-level validators, bv. codes-diff) -->
+      <div class="md:col-span-2" th:if="${#fields.hasGlobalErrors()}">
+        <ul class="text-sm text-red-600 list-disc pl-5 space-y-1">
+          <li th:each="e : ${#fields.globalErrors()}" th:text="${e}">Globale fout</li>
+        </ul>
       </div>
 
+      <!-- NAAM -->
+      <div class="md:col-span-2">
+        <label class="block text-sm text-gray-600 mb-1">Naam</label>
+        <input th:field="*{name}" class="border rounded p-2 w-full" required/>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+      </div>
+
+      <!-- DATUM & TIJD -->
       <div>
         <label class="block text-sm text-gray-600 mb-1">Startdatum & tijd</label>
-       <input type="datetime-local"
-       th:field="*{startDateTime}"
-       th:value="${#temporals.format(festival.startDateTime, 'yyyy-MM-dd''T''HH:mm')}"
-       class="border rounded p-2 w-full" required>
+        <input type="datetime-local"
+               th:field="*{startDateTime}"
+               th:value="${#temporals.format(festival.startDateTime, 'yyyy-MM-dd''T''HH:mm')}"
+               class="border rounded p-2 w-full" required/>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('startDateTime')}" th:errors="*{startDateTime}"></p>
       </div>
 
+      <!-- FESTIVALCODES -->
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Festivalcode 1</label>
+        <input th:field="*{festivalCode1}" type="number" class="border rounded p-2 w-full" required/>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('festivalCode1')}" th:errors="*{festivalCode1}"></p>
+      </div>
+
+      <div>
+        <label class="block text-sm text-gray-600 mb-1">Festivalcode 2</label>
+        <input th:field="*{festivalCode2}" type="number" class="border rounded p-2 w-full" required/>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('festivalCode2')}" th:errors="*{festivalCode2}"></p>
+      </div>
+
+      <!-- TICKETS -->
       <div>
         <label class="block text-sm text-gray-600 mb-1">Beschikbare tickets</label>
-        <input th:field="*{availableTickets}" type="number" min="1" class="border rounded p-2 w-full" required>
+        <input th:field="*{availableTickets}" type="number" min="50" max="300"
+               class="border rounded p-2 w-full" required/>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('availableTickets')}" th:errors="*{availableTickets}"></p>
       </div>
 
+      <!-- PRIJS -->
       <div>
         <label class="block text-sm text-gray-600 mb-1">Ticketprijs (€)</label>
-        <input th:field="*{ticketPrice}" type="number" step="0.01" min="0" class="border rounded p-2 w-full" required>
+        <input th:field="*{ticketPrice}" type="number" step="0.01" min="10.50" max="39.99"
+               placeholder="vb. 12.50" class="border rounded p-2 w-full" required/>
+        <p class="text-xs text-gray-500 mt-1">Prijs moet ≥ 10,50 en &lt; 40,00.</p>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('ticketPrice')}" th:errors="*{ticketPrice}"></p>
       </div>
 
+      <!-- CATEGORIE -->
       <div>
         <label class="block text-sm text-gray-600 mb-1">Categorie</label>
         <select th:field="*{category}" class="border rounded p-2 w-full" required>
           <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.name}">Cat</option>
         </select>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></p>
       </div>
 
+      <!-- STREEK (client-side filter hint) -->
       <div>
         <label class="block text-sm text-gray-600 mb-1">Streek</label>
         <select id="regionSelect" class="border rounded p-2 w-full">
           <option th:each="r : ${regions}" th:value="${r.regionId}" th:text="${r.name}">Reg</option>
         </select>
+        <p class="text-xs text-gray-500 mt-1">Tip: filter locaties client-side door eerst een streek te kiezen.</p>
       </div>
 
+      <!-- LOCATIE -->
       <div class="md:col-span-2">
         <label class="block text-sm text-gray-600 mb-1">Locatie</label>
         <select th:field="*{location}" class="border rounded p-2 w-full" required>
           <option th:each="l : ${locations}" th:value="${l.locationId}"
                   th:text="${l.name + ' (' + l.region.name + ')'}">Loc</option>
         </select>
-        <p class="text-xs text-gray-500 mt-1">Tip: filter locaties client-side door eerst een streek te kiezen (optioneel script).</p>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></p>
       </div>
 
+      <!-- STANDHOUDERS -->
       <div class="md:col-span-2">
         <label class="block text-sm text-gray-600 mb-1">Standhouders (max 4)</label>
-  <select th:field="*{standhouderIds}" multiple size="6" class="border rounded p-2 w-full">
-    <option th:each="s : ${standhouders}"
-            th:value="${s.standhouderId}"
-            th:text="${s.name}">
-    </option>
-  </select>
+        <select th:field="*{standhouderIds}" multiple size="6" class="border rounded p-2 w-full">
+          <option th:each="s : ${standhouders}"
+                  th:value="${s.standhouderId}"
+                  th:text="${s.name}">
+          </option>
+        </select>
+        <p class="text-xs text-gray-500 mt-1">Houd Ctrl/⌘ ingedrukt om meerdere te kiezen.</p>
+        <p class="text-xs text-red-600" th:if="${#fields.hasErrors('standhouderIds')}" th:errors="*{standhouderIds}"></p>
       </div>
 
+      <!-- ACTIES -->
       <div class="md:col-span-2 flex items-center gap-3">
         <button class="px-4 py-2 rounded bg-black text-white">Opslaan</button>
         <a href="/admin/festivals" class="px-4 py-2 rounded border">Annuleren</a>
@@ -78,7 +121,5 @@
   </main>
 
   <div th:replace="~{fragments :: footer}"></div>
-
-  <!-- Optioneel: klein scriptje om locaties te filteren op regio client-side (kan later) -->
 </body>
 </html>
