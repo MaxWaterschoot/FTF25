@@ -8,4 +8,6 @@ public interface ReviewService {
     Review addReview(Long festivalId, Long userId, int rating, String description);
     List<Review> getReviewsForFestival(Long festivalId);
     double getAverageRating(Long festivalId);
+    boolean canUserReview(Long festivalId, String username);
+
 }

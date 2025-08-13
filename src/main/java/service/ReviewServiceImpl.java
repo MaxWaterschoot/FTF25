@@ -74,4 +74,25 @@ public class ReviewServiceImpl implements ReviewService {
         Double avg = reviewRepository.averageRatingForFestival(festivalId);
         return avg == null ? 0.0 : avg;
     }
+    @Override
+    public boolean canUserReview(Long festivalId, String username) {
+        if (username == null || username.isBlank()) return false;
+
+        var festival = festivalRepository.findById(festivalId)
+                .orElseThrow(() -> new EntityNotFoundException("Festival not found"));
+
+        // Mag pas NA het festival
+        if (timeProvider.now().isBefore(festival.getStartDateTime())) {
+            return false;
+        }
+
+        var user = appUserRepository.findByUsername(username);
+        if (user == null) return false;
+
+        boolean attended = ticketPurchaseRepository.existsByUserAndFestival(user, festival);
+        if (!attended) return false;
+
+        boolean already = reviewRepository.existsByFestivalAndAuthor(festival, user);
+        return !already;
+    }
 }

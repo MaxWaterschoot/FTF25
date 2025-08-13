@@ -1,45 +1,74 @@
 package com.springBoot.FTF25;
 
+import dto.ReviewForm;
 import domain.AppUser;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import repository.AppUserRepository;
+import repository.FestivalRepository;
 import service.ReviewService;
-
-import java.security.Principal;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/reviews")
+@RequestMapping("/festivals/{festivalId}/reviews")
+@PreAuthorize("hasRole('USER')")
 public class ReviewController {
 
     private final ReviewService reviewService;
-    private final AppUserRepository appUserRepository;
+    private final FestivalRepository festivalRepo;
+    private final AppUserRepository appUserRepository; 
 
+    @GetMapping
+    public String list(@PathVariable Long festivalId, Authentication auth, Model model) {
+        var festival = festivalRepo.findById(festivalId).orElseThrow();
+        model.addAttribute("festival", festival);
+        model.addAttribute("reviews", reviewService.getReviewsForFestival(festivalId));
+        model.addAttribute("avgRating", reviewService.getAverageRating(festivalId));
+
+        boolean canWrite = auth != null && auth.isAuthenticated()
+                && reviewService.canUserReview(festivalId, auth.getName());
+        model.addAttribute("canWriteReview", canWrite);
+
+        return "festivals/reviews";
+    }
+
+    @GetMapping("/new")
+    public String newForm(@PathVariable Long festivalId, Authentication auth, Model model) {
+        if (auth == null || !auth.isAuthenticated()
+                || !reviewService.canUserReview(festivalId, auth.getName())) {
+            return "redirect:/festivals/{festivalId}/reviews";
+        }
+        model.addAttribute("festival", festivalRepo.findById(festivalId).orElseThrow());
+        model.addAttribute("form", new ReviewForm()); 
+        return "festivals/review-form";
+    }
+
+    
     @PostMapping
-    public String add(@RequestParam("festivalId") Long festivalId,
-                      @RequestParam("rating") int rating,
-                      @RequestParam("description") String description,
-                      Principal principal,
-                      RedirectAttributes ra) {
-
-        if (principal == null) {
-            ra.addAttribute("error", "Je moet ingelogd zijn om te reviewen.");
-            return "redirect:/festivals/" + festivalId;
+    public String createFallback(@PathVariable Long festivalId,
+                                 @ModelAttribute("form") ReviewForm form,
+                                 Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return "redirect:/login";
+        }
+        AppUser user = appUserRepository.findByUsername(auth.getName());
+        if (user == null) {
+            return "redirect:/login";
         }
 
-        AppUser user = appUserRepository.findByUsername(principal.getName())
-              ;
+        int rating = form.getRating();
+        String description = form.getDescription();
 
         try {
             reviewService.addReview(festivalId, user.getUserId(), rating, description);
-            ra.addAttribute("success", "Review toegevoegd!");
-        } catch (Exception e) {
-            ra.addAttribute("error", e.getMessage());
+        } catch (RuntimeException ex) {
         }
-        return "redirect:/festivals/" + festivalId;
+        return "redirect:/festivals/{festivalId}/reviews";
     }
+    
+    
 }

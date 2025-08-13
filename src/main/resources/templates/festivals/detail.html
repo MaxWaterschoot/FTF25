@@ -79,50 +79,44 @@
 		</div>
 
 		<!-- Reviews -->
-		<section class="mt-6 bg-white rounded-xl shadow p-6">
-			<h2 class="text-lg font-semibold mb-4">Reviews</h2>
+		<div class="flex gap-2"
+     xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+  <a class="px-3 py-2 rounded border"
+     sec:authorize="hasRole('USER')"
+     th:href="@{|/festivals/${festival.festivalId}/reviews|}">
+    Reviews
+  </a>
 
-			<div
-				th:if="${#authorization.expression('isAuthenticated()') and canReview}">
-				<form th:action="@{/reviews}" method="post"
-					class="grid md:grid-cols-4 gap-3 mb-6">
-					<input type="hidden" name="festivalId"
-						th:value="${festival.festivalId}"> <input type="hidden"
-						th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-					<div>
-						<label class="block text-sm text-gray-600 mb-1">Score
-							(1-5)</label> <input name="rating" type="number" min="1" max="5"
-							class="border rounded p-2 w-full" value="5">
-					</div>
-					<div class="md:col-span-3">
-						<label class="block text-sm text-gray-600 mb-1">Beschrijving</label>
-						<input name="description" type="text"
-							class="border rounded p-2 w-full"
-							placeholder="Wat vond je ervan?">
-					</div>
-					<div class="md:col-span-4">
-						<button class="px-4 py-2 rounded bg-black text-white">Review
-							plaatsen</button>
-					</div>
-				</form>
-			</div>
-			<p class="text-gray-500 mb-4" th:if="${#lists.isEmpty(reviews)}">Nog
-				geen reviews.</p>
+  <!-- Alleen tonen als controller canWriteReview=true zet -->
+  <a class="px-3 py-2 rounded bg-black text-white"
+     sec:authorize="hasRole('USER')"
+     th:if="${canWriteReview}"
+     th:href="@{|/festivals/${festival.festivalId}/reviews/new|}">
+    Schrijf review
+  </a>
+</div>
 
-			<ul class="space-y-3" th:if="${!#lists.isEmpty(reviews)}">
-				<li th:each="r : ${reviews}" class="border rounded p-3">
-					<div class="flex items-center justify-between">
-						<strong th:text="${r.author.username}">user</strong> <span
-							class="text-sm text-gray-500"
-							th:text="${#temporals.format(r.createdAt,'dd/MM/yyyy HH:mm')}">datum</span>
-					</div>
-					<div class="mt-1">
-						Score: <span class="font-medium" th:text="${r.rating}">5</span>/5
-					</div>
-					<p class="mt-1" th:text="${r.description}">Beschrijving</p>
-				</li>
-			</ul>
-		</section>
+<!-- OPTIONEEL: COMPACT OVERZICHT -->
+<section class="mt-6" th:if="${avgRating != null}">
+  <div class="p-4 bg-white rounded-xl shadow mb-3">
+    Gemiddelde score:
+    <b th:text="${#numbers.formatDecimal(avgRating,1,1)}">0.0</b> / 5
+    <a class="ml-3 underline"
+       th:href="@{|/festivals/${festival.festivalId}/reviews|}">bekijk alle reviews</a>
+  </div>
+
+  <ul class="space-y-3" th:if="${#lists.size(reviews) > 0}">
+    <li th:each="r,iter : ${reviews}" th:if="${iter.index < 3}"
+        class="p-4 bg-white rounded-xl shadow">
+      <div>Score: <b th:text="${r.rating}">5</b> / 5</div>
+      <div class="text-gray-700" th:text="${r.description}">Comment</div>
+      <div class="text-xs text-gray-500"
+           th:if="${r.createdAt != null}"
+           th:text="${#temporals.format(r.createdAt,'dd/MM/yyyy HH:mm')}">datum</div>
+    </li>
+  </ul>
+</section>
+
 	</main>
 
 	<div th:replace="~{fragments :: footer}"></div>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="nl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Write Review')}"></head>
+<body class="bg-gray-50">
+  <div th:replace="~{fragments :: navbar}"></div>
+  <div th:replace="~{fragments :: flash}"></div>
+
+<main class="max-w-xl mx-auto p-6">
+  <h1 class="text-2xl font-semibold mb-4" th:text="${festival.name} + ' — Review schrijven'">Review schrijven</h1>
+
+  <form th:action="@{|/festivals/${festival.festivalId}/reviews|}"
+        th:object="${form}" method="post"
+        class="bg-white rounded-xl shadow p-6 space-y-4">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+    <label class="block">
+      <span class="text-sm text-gray-600">Score (1–5)</span>
+      <select th:field="*{rating}" class="border rounded p-2 w-full" required>
+        <option th:each="i : ${#numbers.sequence(1,5)}" th:value="${i}" th:text="${i}"></option>
+      </select>
+    </label>
+
+    <label class="block">
+      <span class="text-sm text-gray-600">Beschrijving</span>
+      <textarea th:field="*{description}" class="border rounded p-2 w-full" rows="4" required></textarea>
+    </label>
+
+    <div class="flex items-center gap-2">
+      <button type="submit" class="px-4 py-2 rounded bg-black text-white">Opslaan</button>
+      <a th:href="@{|/festivals/${festival.festivalId}/reviews|}" class="px-4 py-2 rounded border">Annuleren</a>
+    </div>
+  </form>
+</main>
+</body>
+</html>
